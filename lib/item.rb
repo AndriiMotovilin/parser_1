@@ -9,19 +9,12 @@ module MyApplicationMotovilin
     include Comparable
 
     ATTRIBUTES = %i[
-      name
-      price
-      description
-      category
-      image_path
-      rating
-      availability
-      url
+      name price description category image_path rating availability url
     ].freeze
 
     attr_accessor(*ATTRIBUTES)
 
-    def initialize(params = {})
+    def initialize(params = {}, &block)
       defaults = {
         name: "Unknown item",
         price: 0.0,
@@ -32,17 +25,11 @@ module MyApplicationMotovilin
         availability: nil,
         url: nil
       }
-
       data = defaults.merge(params.transform_keys(&:to_sym))
-
       ATTRIBUTES.each do |attr|
         send("#{attr}=", data[attr])
       end
-
-      if block_given?
-        yield self
-      end
-
+      yield self if block_given?
       LoggerManager.log_processed_file("Item initialized: #{to_s}")
     rescue StandardError => e
       LoggerManager.log_error("Error during Item initialization: #{e.class} - #{e.message}")
@@ -51,7 +38,6 @@ module MyApplicationMotovilin
 
     def <=>(other)
       return nil unless other.is_a?(Item)
-
       (price || 0.0) <=> (other.price || 0.0)
     end
 
@@ -78,7 +64,6 @@ module MyApplicationMotovilin
 
     def update
       return unless block_given?
-
       yield self
       LoggerManager.log_processed_file("Item updated: #{to_s}")
     rescue StandardError => e
@@ -94,10 +79,9 @@ module MyApplicationMotovilin
         category: Faker::Book.genre,
         image_path: "products/books/#{Faker::Internet.slug}.jpeg",
         rating: %w[One Two Three Four Five].sample,
-        availability: %w[In\ stock Out\ of\ stock].sample,
+        availability: %w[In stock Out of stock].sample,
         url: Faker::Internet.url
       )
-
       LoggerManager.log_processed_file("Fake Item generated: #{item.name}")
       item
     rescue StandardError => e

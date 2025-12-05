@@ -22,21 +22,17 @@ module MyApplicationMotovilin
       @items.each(&block)
     end
 
-
     def save_to_file(path = "output/items.txt")
       FileUtils.mkdir_p(File.dirname(path))
-
       File.open(path, "w") do |f|
         @items.each do |item|
           f.puts(item.info)
         end
       end
-
       LoggerManager.log_processed_file("Cart saved to text file: #{path}")
       path
     end
 
-    # JSON
     def save_to_json(path = "output/items_from_cart.json")
       FileUtils.mkdir_p(File.dirname(path))
       data = @items.map(&:to_h)
@@ -45,31 +41,25 @@ module MyApplicationMotovilin
       path
     end
 
-    # CSV
     def save_to_csv(path = "output/items_from_cart.csv")
       FileUtils.mkdir_p(File.dirname(path))
-
       headers = %w[name price availability rating url description image_path category]
-
       CSV.open(path, "w", write_headers: true, headers: headers) do |csv|
         @items.each do |item|
           h = item.to_h
           csv << headers.map { |key| h[key.to_sym] }
         end
       end
-
       LoggerManager.log_processed_file("Cart saved to CSV: #{path}")
       path
     end
 
     def save_to_yml(dir = "config/yaml_config/products/from_cart")
       FileUtils.mkdir_p(dir)
-
       @items.each_with_index do |item, index|
         file_path = File.join(dir, "item_#{index + 1}.yml")
         File.write(file_path, item.to_h.to_yaml)
       end
-
       LoggerManager.log_processed_file(
         "Cart saved to YAML directory (one file per item): #{dir}"
       )

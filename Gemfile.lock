@@ -7,6 +7,7 @@ GEM
     csv (3.3.5)
     faker (3.5.3)
       i18n (>= 1.8.11, < 2)
+    fiddle (1.1.6)
     httparty (0.23.2)
       csv
       mini_mime (>= 1.0.0)
@@ -16,6 +17,7 @@ GEM
     json (2.17.1)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
+    logger (1.7.0)
     mini_mime (1.1.5)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
@@ -54,7 +56,9 @@ PLATFORMS
 
 DEPENDENCIES
   faker
+  fiddle
   httparty
+  logger
   nokogiri
   rake
   rubocop
@@ -65,11 +69,13 @@ CHECKSUMS
   concurrent-ruby (1.3.5) sha256=813b3e37aca6df2a21a3b9f1d497f8cbab24a2b94cab325bffe65ee0f6cbebc6
   csv (3.3.5) sha256=6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f
   faker (3.5.3) sha256=b961482dc0bb15ccb9a98ea7878b925669e9ae8f5e59b607da540b768137d765
+  fiddle (1.1.6)
   httparty (0.23.2) sha256=72d52830ab5862115a3c9a4b16738dd67d9a691ffd796cf86bad8abaa8f1febb
   i18n (1.14.7) sha256=ceba573f8138ff2c0915427f1fc5bdf4aa3ab8ae88c8ce255eb3ecf0a11a5d0f
   json (2.17.1) sha256=e0e4824541336a44915436f53e7ea74c687314fb8f88080fa1456f6a34ead92e
   language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
+  logger (1.7.0)
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   multi_xml (0.7.2) sha256=307a96dc48613badb7b2fc174fd4e62d7c7b619bc36ea33bfd0c49f64f5787ce
   nokogiri (1.18.10-x64-mingw-ucrt) sha256=64f40d4a41af9f7f83a4e236ad0cf8cca621b97e31f727b1bebdae565a653104

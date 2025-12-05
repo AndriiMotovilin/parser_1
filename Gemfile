@@ -1,3 +1,5 @@
+# Gemfile
+# frozen_string_literal: true
 
 source "https://rubygems.org"
 
@@ -8,3 +10,5 @@ gem "httparty"
 gem "rake"
 gem "faker"
 gem "rubocop", require: false
+gem "logger"
+gem "fiddle"

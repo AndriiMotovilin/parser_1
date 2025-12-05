@@ -1,5 +1,5 @@
 default:
-  root_dir: <%= File.expand_path("..", __dir__) %>
+  root_dir: <%= File.expand_path('..', __dir__) %>
   config_dir: config
   yaml_dir: config/yaml_config
   media_dir: media
@@ -8,3 +8,11 @@ output:
   csv_path: "output/data.csv"
   json_path: "output/data.json"
   yaml_products_path: "config/yaml_config/products/books_from_site.yaml"
+
+run_options:
+  run_website_parser: 1
+  run_save_to_csv: 1
+  run_save_to_json: 1
+  run_save_to_yaml: 1
+  run_save_to_sqlite: 0
+  run_save_to_mongodb: 0
