@@ -1,3 +1,4 @@
+# Gemfile
 # frozen_string_literal: true
 
 source "https://rubygems.org"
@@ -6,6 +7,5 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 gem "nokogiri"
 gem "httparty"
-gem 'rubocop', require: false
-
-# gem "rails"
+gem "rake"             
+gem "rubocop", require: false

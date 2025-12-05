@@ -1,0 +1,6 @@
+[2025-12-05 12:16:29 +0200] BooksScraper started with BASE_URL=https://books.toscrape.com/
+[2025-12-05 12:16:29 +0200] Fetching URL: https://books.toscrape.com/
+[2025-12-05 12:16:30 +0200] Parsed 20 books from page.
+[2025-12-05 12:16:30 +0200] Saved CSV to output/data.csv
+[2025-12-05 12:16:30 +0200] Saved JSON to output/data.json
+[2025-12-05 12:16:30 +0200] BooksScraper finished. Saved 20 books.
