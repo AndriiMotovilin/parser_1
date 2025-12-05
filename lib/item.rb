@@ -8,7 +8,6 @@ module MyApplicationMotovilin
   class Item
     include Comparable
 
-    # Не обов'язково, але зручно мати список атрибутів
     ATTRIBUTES = %i[
       name
       price
@@ -40,11 +39,6 @@ module MyApplicationMotovilin
         send("#{attr}=", data[attr])
       end
 
-      # Дозволяємо додаткову кастомізацію через блок:
-      #
-      # MyApplicationMotovilin::Item.new(name: "X") do |i|
-      #   i.description = "..."
-      # end
       if block_given?
         yield self
       end
@@ -55,14 +49,12 @@ module MyApplicationMotovilin
       raise
     end
 
-    # Для Comparable – порівнюємо за price
     def <=>(other)
       return nil unless other.is_a?(Item)
 
       (price || 0.0) <=> (other.price || 0.0)
     end
 
-    # Динамічне формування хеша з атрибутів
     def to_h
       instance_variables.each_with_object({}) do |var, hash|
         key = var.to_s.delete("@").to_sym
@@ -70,7 +62,6 @@ module MyApplicationMotovilin
       end
     end
 
-    # Рядкове представлення (to_s)
     def to_s
       pairs = to_h.map { |k, v| "#{k}=#{v.inspect}" }
       "#<MyApplicationMotovilin::Item #{pairs.join(', ')}>"
@@ -79,20 +70,12 @@ module MyApplicationMotovilin
       "#<MyApplicationMotovilin::Item ERROR>"
     end
 
-    # Зручний варіант to_s (псевдонім info)
     alias_method :info, :to_s
 
-    # Красивий inspect
     def inspect
       "#<MyApplicationMotovilin::Item name=#{name.inspect}, price=#{price.inspect}, category=#{category.inspect}>"
     end
 
-    # Оновлення через блок:
-    #
-    # item.update do |i|
-    #   i.name = "New name"
-    #   i.price = 100
-    # end
     def update
       return unless block_given?
 
@@ -103,7 +86,6 @@ module MyApplicationMotovilin
       raise
     end
 
-    # Фейковий товар з Faker
     def self.generate_fake
       item = new(
         name: Faker::Book.title,

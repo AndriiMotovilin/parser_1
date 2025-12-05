@@ -1,3 +1,5 @@
+# lib/books_scraper.rb
+# frozen_string_literal: true
 
 require "httparty"
 require "nokogiri"
@@ -7,6 +9,7 @@ require "uri"
 require "yaml"
 require "fileutils"
 require_relative "my_application_motovilin"
+require_relative "cart"
 
 class BooksScraper
   class << self
@@ -14,10 +17,12 @@ class BooksScraper
       web_config     = config_hash["web_scraping"] || {}
       output_config  = config_hash["output"] || {}
 
-      base_url          = web_config["start_page"] || "https://books.toscrape.com/"
-      csv_path          = output_config["csv_path"] || "output/data.csv"
-      json_path         = output_config["json_path"] || "output/data.json"
+      base_url           = web_config["start_page"] || "https://books.toscrape.com/"
+      csv_path           = output_config["csv_path"] || "output/data.csv"
+      json_path          = output_config["json_path"] || "output/data.json"
       yaml_products_path = output_config["yaml_products_path"] || "config/yaml_config/products/books_from_site.yaml"
+
+      yaml_items_dir = "config/yaml_config/products/from_cart"
 
       MyApplicationMotovilin::LoggerManager.log_processed_file(
         "BooksScraper started with BASE_URL=#{base_url}"
@@ -26,8 +31,14 @@ class BooksScraper
       doc   = fetch_page(base_url)
       items = parse_items_from_doc(doc, web_config)
 
-      save_to_csv(items, csv_path)
-      save_to_json(items, json_path)
+      cart = MyApplicationMotovilin::Cart.new(items)
+
+      cart.save_to_csv(csv_path)
+      cart.save_to_json(json_path)
+      cart.save_to_file("output/items.txt")
+      cart.save_to_yml(yaml_items_dir)
+
+
       save_to_products_yaml(items, yaml_products_path)
 
       MyApplicationMotovilin::LoggerManager.log_processed_file(
@@ -35,9 +46,11 @@ class BooksScraper
       )
 
       puts "Saved #{items.size} items to:"
-      puts "  - #{csv_path}"
-      puts "  - #{json_path}"
-      puts "  - #{yaml_products_path} (YAML у форматі categories/products)"
+      puts "  - #{csv_path} (CSV via Cart)"
+      puts "  - #{json_path} (JSON via Cart)"
+      puts "  - output/items.txt (text via Cart)"
+      puts "  - #{yaml_items_dir} (many YAML files, one per item via Cart)"
+      puts "  - #{yaml_products_path} (single YAML file, categories/products format)"
     rescue StandardError => e
       MyApplicationMotovilin::LoggerManager.log_error(
         "BooksScraper error: #{e.class} - #{e.message}"
@@ -108,22 +121,6 @@ class BooksScraper
       items
     end
 
-    def save_to_csv(items, path)
-      headers = %w[name price availability rating url description image_path category]
-
-      CSV.open(path, "w", write_headers: true, headers: headers) do |csv|
-        items.each do |item|
-          h = item.to_h
-          csv << headers.map { |key| h[key.to_sym] }
-        end
-      end
-    end
-
-    def save_to_json(items, path)
-      array_of_hashes = items.map(&:to_h)
-      File.write(path, JSON.pretty_generate(array_of_hashes))
-    end
-
     def save_to_products_yaml(items, path)
       FileUtils.mkdir_p(File.dirname(path))
 
@@ -144,6 +141,9 @@ class BooksScraper
       }
 
       File.write(path, yaml_data.to_yaml)
+      MyApplicationMotovilin::LoggerManager.log_processed_file(
+        "Single products YAML saved to #{path}"
+      )
     end
 
     def normalize_price(price_str)
