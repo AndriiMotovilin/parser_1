@@ -1,0 +1,10 @@
+default:
+  # Корінь проєкту (через ERB)
+  root_dir: <%= File.expand_path("..", __dir__) %>
+  config_dir: config
+  yaml_dir: config/yaml_config
+  media_dir: media
+
+output:
+  csv_path: "output/data.csv"
+  json_path: "output/data.json"

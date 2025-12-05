@@ -1,0 +1,8 @@
+categories:
+  - name: Books
+    products:
+      - name: "A Light in the Attic"
+        price: 51.77
+        description: |-
+          A Light in the Attic — приклад книги з сайту Books to Scrape.
+        media: products/books/a_light_in_the_attic.jpeg

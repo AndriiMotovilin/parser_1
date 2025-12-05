@@ -1,0 +1,11 @@
+database_config:
+  database_type: sqlite
+
+  sqlite_database:
+    db_file: db/local_database.sqlite
+    timeout: 5000
+    pool_size: 5
+
+  mongodb_database:
+    uri: mongodb://localhost:27017
+    db_name: my_database

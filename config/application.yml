@@ -1,8 +1,0 @@
-# config/application.yml
-
-source:
-  base_url: "https://books.toscrape.com/"
-
-output:
-  csv_path: "output/data.csv"
-  json_path: "output/data.json"

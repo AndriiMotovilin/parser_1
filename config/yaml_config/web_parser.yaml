@@ -1,0 +1,7 @@
+web_scraping:
+  start_page: https://books.toscrape.com/
+
+  product_name_selector: "article.product_pod h3 a"
+  product_price_selector: "article.product_pod p.price_color"
+  product_description_selector: ""
+  product_image_selector: "article.product_pod div.image_container img"

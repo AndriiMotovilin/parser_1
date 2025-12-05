@@ -4,97 +4,114 @@
 require "httparty"
 require "nokogiri"
 require "csv"
-require "yaml"
 require "json"
 require "uri"
+require_relative "my_application_motovilin"
 
 class BooksScraper
-  CONFIG    = YAML.load_file("config/application.yml")
-  BASE_URL  = CONFIG.dig("source", "base_url") || "https://books.toscrape.com/"
-  CSV_PATH  = CONFIG.dig("output", "csv_path") || "output/data.csv"
-  JSON_PATH = CONFIG.dig("output", "json_path") || "output/data.json"
-  LOG_PATH  = "logs/application.log"
-
   class << self
-    def run
-      log "BooksScraper started with BASE_URL=#{BASE_URL}"
+    # run приймає хеш усіх конфігів
+    def run(config_hash)
+      web_config    = config_hash["web_scraping"] || {}
+      output_config = config_hash["output"] || {}
 
-      doc   = fetch_page(BASE_URL)
-      books = parse_books_from_doc(doc)
+      base_url  = web_config["start_page"] || "https://books.toscrape.com/"
+      csv_path  = output_config["csv_path"] || "output/data.csv"
+      json_path = output_config["json_path"] || "output/data.json"
 
-      save_to_csv(books, CSV_PATH)
-      save_to_json(books, JSON_PATH)
+      MyApplicationMotovilin::LoggerManager.log_processed_file(
+        "BooksScraper started with BASE_URL=#{base_url}"
+      )
 
-      log "BooksScraper finished. Saved #{books.size} books."
-      puts "Saved #{books.size} books to #{CSV_PATH} and #{JSON_PATH}"
+      doc   = fetch_page(base_url)
+      books = parse_books_from_doc(doc, web_config)
+
+      save_to_csv(books, csv_path)
+      save_to_json(books, json_path)
+
+      MyApplicationMotovilin::LoggerManager.log_processed_file(
+        "BooksScraper finished. Saved #{books.size} books."
+      )
+
+      puts "Saved #{books.size} books to #{csv_path} and #{json_path}"
     rescue StandardError => e
-      log "ERROR: #{e.class} - #{e.message}"
+      MyApplicationMotovilin::LoggerManager.log_error(
+        "BooksScraper error: #{e.class} - #{e.message}"
+      )
       puts "Error: #{e.message}"
     end
 
     private
 
     def fetch_page(url)
-      log "Fetching URL: #{url}"
       response = HTTParty.get(url)
       raise "Request failed with code #{response.code}" unless response.code == 200
 
       Nokogiri::HTML(response.body)
     end
 
-    # Парсимо одну сторінку (головну) Books to Scrape
-    def parse_books_from_doc(doc)
+    def parse_books_from_doc(doc, web_config)
+      name_selector        = web_config["product_name_selector"]        || "article.product_pod h3 a"
+      price_selector       = web_config["product_price_selector"]       || "article.product_pod p.price_color"
+      description_selector = web_config["product_description_selector"]
+      image_selector       = web_config["product_image_selector"]       || "article.product_pod div.image_container img"
+
+      start_page = web_config["start_page"] || "https://books.toscrape.com/"
+
       books = []
 
       doc.css("article.product_pod").each do |book_node|
-        link_node    = book_node.at_css("h3 a")
-        title        = link_node["title"]
+        link_node = book_node.at_css(name_selector) || book_node.at_css("h3 a")
+        title     = link_node["title"]
         relative_url = link_node["href"]
-        url          = URI.join(BASE_URL, relative_url).to_s
+        url = URI.join(start_page, relative_url).to_s
 
-        price        = book_node.at_css("p.price_color")&.text&.strip
+        price_node = book_node.at_css(price_selector) || book_node.at_css("p.price_color")
+        price      = price_node&.text&.strip
+
         availability = book_node.at_css("p.instock.availability")&.text&.strip
+
+        description = nil
+        if description_selector && !description_selector.empty?
+          description_node = book_node.at_css(description_selector)
+          description = description_node&.text&.strip
+        end
+
+        image_node = book_node.at_css(image_selector)
+        image_url  = if image_node && image_node["src"]
+                       URI.join(start_page, image_node["src"]).to_s
+                     end
+
         rating_node  = book_node.at_css("p.star-rating")
         rating_class = rating_node["class"].split - ["star-rating"]
-        rating       = rating_class.first # "One", "Two", "Three"...
+        rating       = rating_class.first
 
         books << {
           title:        title,
           price:        price,
           availability: availability,
           rating:       rating,
-          url:          url
+          url:          url,
+          description:  description,
+          image_url:    image_url
         }
       end
 
-      log "Parsed #{books.size} books from page."
       books
     end
 
     def save_to_csv(books, path)
-      CSV.open(path, "w", write_headers: true, headers: %w[title price availability rating url]) do |csv|
+      headers = %w[title price availability rating url description image_url]
+
+      CSV.open(path, "w", write_headers: true, headers: headers) do |csv|
         books.each do |book|
-          csv << [
-            book[:title],
-            book[:price],
-            book[:availability],
-            book[:rating],
-            book[:url]
-          ]
+          csv << headers.map { |h| book[h.to_sym] }
         end
       end
-      log "Saved CSV to #{path}"
     end
 
     def save_to_json(books, path)
       File.write(path, JSON.pretty_generate(books))
-      log "Saved JSON to #{path}"
-    end
-
-    def log(message)
-      File.open(LOG_PATH, "a") do |file|
-        file.puts("[#{Time.now}] #{message}")
-      end
     end
   end
 end
