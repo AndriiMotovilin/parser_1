@@ -1,5 +1,4 @@
 default:
-  # Корінь проєкту (через ERB)
   root_dir: <%= File.expand_path("..", __dir__) %>
   config_dir: config
   yaml_dir: config/yaml_config
@@ -8,3 +7,4 @@ default:
 output:
   csv_path: "output/data.csv"
   json_path: "output/data.json"
+  yaml_products_path: "config/yaml_config/products/books_from_site.yaml"

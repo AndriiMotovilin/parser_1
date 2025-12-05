@@ -6,6 +6,8 @@ require "nokogiri"
 require "csv"
 require "json"
 require "uri"
+require "yaml"
+require "fileutils"
 require_relative "my_application_motovilin"
 
 class BooksScraper
@@ -15,9 +17,10 @@ class BooksScraper
       web_config    = config_hash["web_scraping"] || {}
       output_config = config_hash["output"] || {}
 
-      base_url  = web_config["start_page"] || "https://books.toscrape.com/"
-      csv_path  = output_config["csv_path"] || "output/data.csv"
-      json_path = output_config["json_path"] || "output/data.json"
+      base_url          = web_config["start_page"] || "https://books.toscrape.com/"
+      csv_path          = output_config["csv_path"] || "output/data.csv"
+      json_path         = output_config["json_path"] || "output/data.json"
+      yaml_products_path = output_config["yaml_products_path"] || "config/yaml_config/products/books_from_site.yaml"
 
       MyApplicationMotovilin::LoggerManager.log_processed_file(
         "BooksScraper started with BASE_URL=#{base_url}"
@@ -28,12 +31,16 @@ class BooksScraper
 
       save_to_csv(books, csv_path)
       save_to_json(books, json_path)
+      save_to_products_yaml(books, yaml_products_path)
 
       MyApplicationMotovilin::LoggerManager.log_processed_file(
         "BooksScraper finished. Saved #{books.size} books."
       )
 
-      puts "Saved #{books.size} books to #{csv_path} and #{json_path}"
+      puts "Saved #{books.size} books to:"
+      puts "  - #{csv_path}"
+      puts "  - #{json_path}"
+      puts "  - #{yaml_products_path} (YAML у форматі categories/products)"
     rescue StandardError => e
       MyApplicationMotovilin::LoggerManager.log_error(
         "BooksScraper error: #{e.class} - #{e.message}"
@@ -112,6 +119,48 @@ class BooksScraper
 
     def save_to_json(books, path)
       File.write(path, JSON.pretty_generate(books))
+    end
+
+    # ✅ ГОЛОВНЕ: збереження ВСІХ даних в одному YAML-файлі
+    # у форматі як у прикладі з "Вітамінами":
+    #
+    # categories:
+    #   - name: Books
+    #     products:
+    #       - name: ...
+    #         price: ...
+    #         description: ...
+    #         media: ...
+    #
+    def save_to_products_yaml(books, path)
+      FileUtils.mkdir_p(File.dirname(path))
+
+      yaml_data = {
+        "categories" => [
+          {
+            "name" => "Books",
+            "products" => books.map do |book|
+              {
+                "name"        => book[:title],
+                "price"       => normalize_price(book[:price]),
+                "description" => book[:description] || "",
+                # в media кладемо або картинку, або хоча б посилання на книгу
+                "media"       => book[:image_url] || book[:url]
+              }
+            end
+          }
+        ]
+      }
+
+      File.write(path, yaml_data.to_yaml)
+    end
+
+    def normalize_price(price_str)
+      return nil unless price_str
+
+      # "£51.77" -> 51.77
+      cleaned = price_str.gsub(/[^\d\.]/, "")
+      cleaned.empty? ? nil : cleaned.to_f
     end
   end
 end
