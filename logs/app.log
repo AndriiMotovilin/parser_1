@@ -7,3 +7,5 @@ I, [2025-12-05T12:49:14.759164 #17940]  INFO -- : BooksScraper started with BASE
 I, [2025-12-05T12:49:15.480220 #17940]  INFO -- : BooksScraper finished. Saved 20 books.
 I, [2025-12-05T12:50:00.586275 #14864]  INFO -- : BooksScraper started with BASE_URL=https://books.toscrape.com/
 I, [2025-12-05T12:50:01.264974 #14864]  INFO -- : BooksScraper finished. Saved 20 books.
+I, [2025-12-05T12:54:58.396956 #6252]  INFO -- : BooksScraper started with BASE_URL=https://books.toscrape.com/
+I, [2025-12-05T12:54:59.124699 #6252]  INFO -- : BooksScraper finished. Saved 20 books.

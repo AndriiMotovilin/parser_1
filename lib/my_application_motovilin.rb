@@ -1,5 +1,3 @@
-# lib/my_application_motovilin.rb
-# frozen_string_literal: true
 
 require "erb"
 require "yaml"
@@ -8,12 +6,10 @@ require "logger"
 require "fileutils"
 
 module MyApplicationMotovilin
-  # Клас для завантаження YAML-конфігів і автопідключення бібліотек
   class AppConfigLoader
     class << self
       attr_reader :config_data, :loaded_libs
 
-      # Автоматичне підключення системних та локальних бібліотек
       def load_libs
         system_libs = %w[date json yaml logger fileutils erb]
         system_libs.each { |lib| require lib }
@@ -22,8 +18,8 @@ module MyApplicationMotovilin
 
         Dir.glob("lib/**/*.rb").each do |file|
           abs = File.expand_path(file)
-          next if file.end_with?("main.rb")        # не чіпаємо main.rb
-          next if abs == File.expand_path(__FILE__) # не підключаємо самих себе
+          next if file.end_with?("main.rb")
+          next if abs == File.expand_path(__FILE__)
           next if @loaded_libs.include?(abs)
 
           require abs
@@ -31,21 +27,18 @@ module MyApplicationMotovilin
         end
       end
 
-      # Головний метод: завантажити всі конфіги
       def config(main_config_path, yaml_dir)
         base_config  = load_default_config(main_config_path)
         extra_config = load_config(yaml_dir)
         @config_data = deep_merge(base_config, extra_config)
       end
 
-      # Красивий вивід конфігів у JSON
       def pretty_print_config_data
         puts JSON.pretty_generate(@config_data || {})
       end
 
       private
 
-      # Завантаження основного конфігу (ERB + YAML)
       def load_default_config(path)
         return {} unless File.exist?(path)
 
@@ -53,7 +46,6 @@ module MyApplicationMotovilin
         YAML.safe_load(erb_result, aliases: true) || {}
       end
 
-      # Завантаження всіх YAML з директорії
       def load_config(dir)
         return {} unless Dir.exist?(dir)
 
@@ -65,7 +57,6 @@ module MyApplicationMotovilin
         merged
       end
 
-      # Глибокий merge хешів
       def deep_merge(hash1, hash2)
         return hash2 unless hash1.is_a?(Hash) && hash2.is_a?(Hash)
 
@@ -80,7 +71,6 @@ module MyApplicationMotovilin
     end
   end
 
-  # Клас для керування логуванням
   class LoggerManager
     class << self
       attr_reader :logger, :error_logger

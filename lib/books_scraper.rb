@@ -1,5 +1,3 @@
-# lib/books_scraper.rb
-# frozen_string_literal: true
 
 require "httparty"
 require "nokogiri"
@@ -12,7 +10,6 @@ require_relative "my_application_motovilin"
 
 class BooksScraper
   class << self
-    # run приймає хеш усіх конфігів
     def run(config_hash)
       web_config    = config_hash["web_scraping"] || {}
       output_config = config_hash["output"] || {}
@@ -121,17 +118,6 @@ class BooksScraper
       File.write(path, JSON.pretty_generate(books))
     end
 
-    # ✅ ГОЛОВНЕ: збереження ВСІХ даних в одному YAML-файлі
-    # у форматі як у прикладі з "Вітамінами":
-    #
-    # categories:
-    #   - name: Books
-    #     products:
-    #       - name: ...
-    #         price: ...
-    #         description: ...
-    #         media: ...
-    #
     def save_to_products_yaml(books, path)
       FileUtils.mkdir_p(File.dirname(path))
 
@@ -144,7 +130,6 @@ class BooksScraper
                 "name"        => book[:title],
                 "price"       => normalize_price(book[:price]),
                 "description" => book[:description] || "",
-                # в media кладемо або картинку, або хоча б посилання на книгу
                 "media"       => book[:image_url] || book[:url]
               }
             end
